@@ -61,11 +61,28 @@ async def ping_(c, m):
     await sent.edit(f"🏓 Pong! `{ms}ms`")
 
 
+@app.on_message(filters.command("help"))
+async def help_(c, m):
+    await m.reply(
+        "📖 **RootHelper — comandos**\n\n"
+        "🏓 /ping — latência\n"
+        "📕 /rules — regras do grupo\n"
+        "🛡️ /setrules <texto> (admin) — definir regras\n"
+        "🚨 /report (responder msg) — chamar admins\n"
+        "📝 /note <gatilho> <texto> (admin) — criar nota\n"
+        "🗑️ /delnote <gatilho> (admin) — remover nota\n"
+        "❗ `!gatilho` — mostra a nota\n"
+        "⚠️ /warn /unwarn (responder, admin) — 3 warns = mute\n"
+        "📌 /pin (responder, admin) — fixar msg\n"
+        "🤖 Automático: welcome, antiflood (6 msgs/10s)"
+    )
+
+
 @app.on_message(filters.command("start"))
 async def start_(c, m):
     await m.reply(
         "🤖 **RootHelper** — helper para grupos de ROMs\n\n"
-        "Comandos: /rules /report /note /warn /pin\n"
+        "Comandos: /help /rules /report /note /warn /pin\n"
         "ROMs: /ofox /los /cr /axion /ksu /lsp /apatch",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📕 Regras", callback_data="show_rules")]]),
     )
