@@ -21,7 +21,12 @@ STARTUP_NOTICE = os.environ.get("STARTUP_NOTICE", "🛠️ RootHelper online —
 DATA = Path(os.environ.get("DATA_DIR", "data"))
 DATA.mkdir(exist_ok=True)
 
-app = Client("roothelper", bot_token=BOT_TOKEN)
+app = Client(
+    "roothelper",
+    api_id=int(os.environ.get("API_ID", "0") or 0),
+    api_hash=os.environ.get("API_HASH", ""),
+    bot_token=BOT_TOKEN,
+)
 
 
 def _load(name, default):
