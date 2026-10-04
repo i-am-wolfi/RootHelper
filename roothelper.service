@@ -1,0 +1,15 @@
+[Unit]
+Description=RootHelper Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/RootHelper
+EnvironmentFile=/opt/RootHelper/bot.env
+ExecStart=/opt/RootHelper/.venv/bin/python /opt/RootHelper/bot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
