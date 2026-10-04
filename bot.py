@@ -80,7 +80,7 @@ async def help_(c, m):
         "/los <cod> — LineageOS\n"
         "/cr <cod> [versão] — crDroid\n"
         "/axion <cod> [gms|vanilla] — AxionOS\n"
-        "/xfw <cod> — firmware Xiaomi\n"
+        "/miui <cod> — firmware Xiaomi (MIUI/HyperOS)\n"
         "/ngapps [android] [variante] — NikGapps\n"
         "/ksu /lsp /zygisk /apatch — root tools"
     )
@@ -321,11 +321,11 @@ async def root_tools_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command("xfw"))
-async def xfw_(c, m):
+@app.on_message(filters.command("miui"))
+async def miui_(c, m):
     args = m.text.split()
     if len(args) < 2:
-        await m.reply("Uso: `/xfw <codinome>`")
+        await m.reply("Uso: `/miui <codinome>`")
         return
     sent = await m.reply(f"`Buscando firmware de {args[1]}...`")
     try:
