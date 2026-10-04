@@ -74,7 +74,15 @@ async def help_(c, m):
         "❗ `!gatilho` — mostra a nota\n"
         "⚠️ /warn /unwarn (responder, admin) — 3 warns = mute\n"
         "📌 /pin (responder, admin) — fixar msg\n"
-        "🤖 Automático: welcome, antiflood (6 msgs/10s)"
+        "🤖 Automático: welcome, antiflood (6 msgs/10s)\n\n"
+        "📱 **ROMs & root:**\n"
+        "/ofox <cod> [stable|beta] — OrangeFox\n"
+        "/los <cod> — LineageOS\n"
+        "/cr <cod> [versão] — crDroid\n"
+        "/axion <cod> [gms|vanilla] — AxionOS\n"
+        "/xfw <cod> — firmware Xiaomi\n"
+        "/ngapps [android] [variante] — NikGapps\n"
+        "/ksu /lsp /zygisk /apatch — root tools"
     )
 
 
@@ -237,6 +245,101 @@ async def pin_(c, m):
         await m.reply("📌 Fixada.")
     except Exception as e:
         await m.reply(f"Falha ao fixar (preciso ser admin com direito de fixar): `{e}`")
+
+
+# ---------- ROMs & root (só leitura, funciona em grupo) ----------
+import roms as R
+
+
+async def _run(fn, *args):
+    import asyncio as _aio
+    return await _aio.to_thread(fn, *args)
+
+
+@app.on_message(filters.command("ofox"))
+async def ofox_(c, m):
+    args = m.text.split()
+    if len(args) < 2:
+        await m.reply("Uso: `/ofox <codinome> [stable|beta]`")
+        return
+    want = args[2].lower() if len(args) > 2 and args[2].lower() in ("stable", "beta") else "stable"
+    sent = await m.reply(f"`Buscando OrangeFox {want} para {args[1]}...`")
+    try:
+        await sent.edit(await _run(R.ofox, args[1], want), disable_web_page_preview=True)
+    except Exception as e:
+        await sent.edit(f"`Falha: {e}`")
+
+
+@app.on_message(filters.command("los"))
+async def los_(c, m):
+    args = m.text.split()
+    if len(args) < 2:
+        await m.reply("Uso: `/los <codinome>`")
+        return
+    sent = await m.reply(f"`Buscando LineageOS para {args[1]}...`")
+    try:
+        await sent.edit(await _run(R.los, args[1]), disable_web_page_preview=True)
+    except Exception as e:
+        await sent.edit(f"`Falha: {e}`")
+
+
+@app.on_message(filters.command("cr"))
+async def cr_(c, m):
+    args = m.text.split()
+    if len(args) < 2:
+        await m.reply("Uso: `/cr <codinome> [versão]`")
+        return
+    ver = int(args[2]) if len(args) > 2 and args[2].isdigit() else 0
+    sent = await m.reply(f"`Buscando crDroid para {args[1]}...`")
+    try:
+        await sent.edit(await _run(R.cr, args[1], ver), disable_web_page_preview=True)
+    except Exception as e:
+        await sent.edit(f"`Falha: {e}`")
+
+
+@app.on_message(filters.command("axion"))
+async def axion_(c, m):
+    args = m.text.split()
+    if len(args) < 2:
+        await m.reply("Uso: `/axion <codinome> [gms|vanilla]`")
+        return
+    var = args[2].upper() if len(args) > 2 and args[2].lower() in ("gms", "vanilla") else "VANILLA"
+    sent = await m.reply(f"`Buscando AxionOS {var} para {args[1]}...`")
+    try:
+        await sent.edit(await _run(R.axion, args[1], var), disable_web_page_preview=True)
+    except Exception as e:
+        await sent.edit(f"`Falha: {e}`")
+
+
+@app.on_message(filters.command(["ksu", "lsp", "zygisk", "apatch"]))
+async def root_tools_(c, m):
+    cmd = m.text.split()[0].lstrip("/").split("@")[0]
+    sent = await m.reply(f"`Buscando {cmd}...`")
+    try:
+        await sent.edit(await _run(getattr(R, cmd)), disable_web_page_preview=True)
+    except Exception as e:
+        await sent.edit(f"`Falha: {e}`")
+
+
+@app.on_message(filters.command("xfw"))
+async def xfw_(c, m):
+    args = m.text.split()
+    if len(args) < 2:
+        await m.reply("Uso: `/xfw <codinome>`")
+        return
+    sent = await m.reply(f"`Buscando firmware de {args[1]}...`")
+    try:
+        await sent.edit(await _run(R.xfw, args[1]), disable_web_page_preview=True)
+    except Exception as e:
+        await sent.edit(f"`Falha: {e}`")
+
+
+@app.on_message(filters.command("ngapps"))
+async def ngapps_(c, m):
+    args = m.text.split()
+    ver = next((a for a in args[1:] if a.isdigit()), "")
+    var = next((a.capitalize() for a in args[1:] if not a.isdigit()), "")
+    await m.reply(R.ngapps(ver, var), disable_web_page_preview=True)
 
 
 async def main():
