@@ -5,3 +5,4 @@ data/
 *.session*
 bot.env
 .env
+roothelper.log
