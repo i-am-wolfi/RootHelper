@@ -53,7 +53,11 @@ def is_admin(chat_id, user_id):
     return user_id == OWNER_ID
 
 
-@app.on_message(filters.command("ping"))
+PREFIXES = ["/", "#", "!"]
+cmd = filters.command
+
+
+@app.on_message(cmd("ping", prefixes=PREFIXES))
 async def ping_(c, m):
     t0 = time.time()
     sent = await m.reply("🏓 Pong!")
@@ -61,10 +65,10 @@ async def ping_(c, m):
     await sent.edit(f"🏓 Pong! `{ms}ms`")
 
 
-@app.on_message(filters.command("help"))
+@app.on_message(cmd("help", prefixes=PREFIXES))
 async def help_(c, m):
     await m.reply(
-        "📖 **RootHelper — comandos**\n\n"
+        "📖 **RootHelper — comandos** (use `/`, `#` ou `!`)\n\n"
         "🏓 /ping — latência\n"
         "📕 /rules — regras do grupo\n"
         "🛡️ /setrules <texto> (admin) — definir regras\n"
@@ -82,11 +86,11 @@ async def help_(c, m):
         "/axion <cod> [gms|vanilla] — AxionOS\n"
         "/miui <cod> — firmware Xiaomi (MIUI/HyperOS)\n"
         "/ngapps [android] [variante] — NikGapps\n"
-        "/ksu /lsp /zygisk /apatch — root tools"
+        "/ksu /ksun /lsp /zygisk /apatch — root tools"
     )
 
 
-@app.on_message(filters.command("start"))
+@app.on_message(cmd("start", prefixes=PREFIXES))
 async def start_(c, m):
     await m.reply(
         "🤖 **RootHelper** — helper para grupos de ROMs\n\n"
@@ -96,13 +100,13 @@ async def start_(c, m):
     )
 
 
-@app.on_message(filters.command("rules"))
+@app.on_message(cmd("rules", prefixes=PREFIXES))
 async def rules_(c, m):
     text = rules_db.get(str(m.chat.id), "📌 Sem regras definidas. Admins: /setrules <texto>")
     await m.reply(f"📕 **Regras**\n\n{text}")
 
 
-@app.on_message(filters.command("setrules") & filters.group)
+@app.on_message(cmd("setrules", prefixes=PREFIXES) & filters.group)
 async def setrules_(c, m):
     member = await c.get_chat_member(m.chat.id, m.from_user.id)
     if member.status not in ("administrator", "creator") and m.from_user.id != OWNER_ID:
@@ -133,7 +137,7 @@ async def welcome_(c, m):
         await m.reply(txt)
 
 
-@app.on_message(filters.command("report") & filters.group)
+@app.on_message(cmd("report", prefixes=PREFIXES) & filters.group)
 async def report_(c, m):
     if not m.reply_to_message:
         await m.reply("Responda a mensagem a denunciar com /report.")
@@ -151,7 +155,7 @@ async def report_(c, m):
     )
 
 
-@app.on_message(filters.command(["note", "addnote"]) & filters.group)
+@app.on_message(cmd(["note", "addnote"], prefixes=PREFIXES) & filters.group)
 async def addnote_(c, m):
     member = await c.get_chat_member(m.chat.id, m.from_user.id)
     if member.status not in ("administrator", "creator") and m.from_user.id != OWNER_ID:
@@ -165,7 +169,7 @@ async def addnote_(c, m):
     await m.reply(f"✅ Nota `!{parts[1].lower()}` salva.")
 
 
-@app.on_message(filters.command("delnote") & filters.group)
+@app.on_message(cmd("delnote", prefixes=PREFIXES) & filters.group)
 async def delnote_(c, m):
     parts = m.text.split(None, 1)
     notes = notes_db.get(str(m.chat.id), {})
@@ -180,6 +184,13 @@ async def delnote_(c, m):
 @app.on_message(filters.group & filters.text & ~filters.service)
 async def notes_watch(c, m):
     text = (m.text or "").strip()
+    if text[:1] in ("!", "#", "/") and len(text) > 1:
+        trig = text[1:].split()[0].lower().split("@")[0]
+        if trig in ("ping", "help", "start", "rules", "setrules", "report",
+                    "note", "addnote", "delnote", "warn", "unwarn", "pin",
+                    "ofox", "los", "cr", "axion", "ksu", "lsp", "zygisk",
+                    "apatch", "miui", "ngapps"):
+            return  # é comando, não nota
     if text.startswith("!") and len(text) > 1:
         note = notes_db.get(str(m.chat.id), {}).get(text[1:].split()[0].lower())
         if note:
@@ -198,7 +209,7 @@ async def notes_watch(c, m):
         await c.send_message(m.chat.id, f"🐢 {m.from_user.mention}, devagar! Flood detectado.")
 
 
-@app.on_message(filters.command("warn") & filters.group)
+@app.on_message(cmd("warn", prefixes=PREFIXES) & filters.group)
 async def warn_(c, m):
     member = await c.get_chat_member(m.chat.id, m.from_user.id)
     if member.status not in ("administrator", "creator") and m.from_user.id != OWNER_ID:
@@ -221,7 +232,7 @@ async def warn_(c, m):
         await m.reply(f"⚠️ Warn {n}/3 para {target.mention}.")
 
 
-@app.on_message(filters.command("unwarn") & filters.group)
+@app.on_message(cmd("unwarn", prefixes=PREFIXES) & filters.group)
 async def unwarn_(c, m):
     member = await c.get_chat_member(m.chat.id, m.from_user.id)
     if member.status not in ("administrator", "creator") and m.from_user.id != OWNER_ID:
@@ -235,7 +246,7 @@ async def unwarn_(c, m):
     await m.reply(f"✅ Warns de {target.mention} zerados.")
 
 
-@app.on_message(filters.command("pin") & filters.group)
+@app.on_message(cmd("pin", prefixes=PREFIXES) & filters.group)
 async def pin_(c, m):
     if not m.reply_to_message:
         await m.reply("Responda a mensagem com /pin.")
@@ -256,7 +267,7 @@ async def _run(fn, *args):
     return await _aio.to_thread(fn, *args)
 
 
-@app.on_message(filters.command("ofox"))
+@app.on_message(cmd("ofox", prefixes=PREFIXES))
 async def ofox_(c, m):
     args = m.text.split()
     if len(args) < 2:
@@ -270,7 +281,7 @@ async def ofox_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command("los"))
+@app.on_message(cmd("los", prefixes=PREFIXES))
 async def los_(c, m):
     args = m.text.split()
     if len(args) < 2:
@@ -283,7 +294,7 @@ async def los_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command("cr"))
+@app.on_message(cmd("cr", prefixes=PREFIXES))
 async def cr_(c, m):
     args = m.text.split()
     if len(args) < 2:
@@ -297,7 +308,7 @@ async def cr_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command("axion"))
+@app.on_message(cmd("axion", prefixes=PREFIXES))
 async def axion_(c, m):
     args = m.text.split()
     if len(args) < 2:
@@ -311,17 +322,76 @@ async def axion_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command(["ksu", "lsp", "zygisk", "apatch"]))
+@app.on_message(cmd(["ksu", "lsp", "zygisk", "apatch"], prefixes=PREFIXES))
 async def root_tools_(c, m):
-    cmd = m.text.split()[0].lstrip("/").split("@")[0]
-    sent = await m.reply(f"`Buscando {cmd}...`")
+    cmdname = m.text.split()[0].lstrip("/#!").split("@")[0]
+    sent = await m.reply(f"`Buscando {cmdname}...`")
     try:
-        await sent.edit(await _run(getattr(R, cmd)), disable_web_page_preview=True)
+        await sent.edit(await _run(getattr(R, cmdname)), disable_web_page_preview=True)
     except Exception as e:
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command("miui"))
+@app.on_message(cmd("ksun", prefixes=PREFIXES))
+async def ksun_(c, m):
+    """KernelSU-Next por build (mesmo esquema do KannaX)."""
+    args = m.text.split()
+    if len(args) < 2 or not args[1].isdigit():
+        await m.reply("Uso: `#ksun <build>`  ex: `#ksun 33215`")
+        return
+    build = args[1]
+    tag = f"#ci_{build[-4:]}"
+    channel = "ksunext_ci"
+    sent = await m.reply(f"`Procurando build {build} em @{channel}...`")
+    try:
+        cands = []
+        offset = 0
+        for _ in range(5):  # até ~500 msgs recentes
+            batch = await c.get_history(channel, limit=100, offset_id=offset)
+            if not batch:
+                break
+            cands.extend(batch)
+            offset = batch[-1].id
+            if len(batch) < 100:
+                break
+
+        def _info(msg):
+            text = (msg.text or msg.caption or "")
+            doc = getattr(msg, "document", None)
+            return (
+                tag.lower() in text.lower(),
+                build in text,
+                bool(doc and (doc.file_name or "").endswith(".apk")),
+                bool(doc or msg.photo or msg.video),
+            )
+
+        cands.sort(key=lambda x: (_info(x)[0], _info(x)[1], _info(x)[2]), reverse=True)
+        found = None
+        for x in cands:
+            has_tag, has_build, is_apk, _ = _info(x)
+            if (has_tag and has_build) or (has_tag and is_apk):
+                found = x
+                break
+        if not found:
+            found = next((x for x in cands if _info(x)[3]), None)
+    except Exception as e:
+        await sent.edit(
+            f"`Falha lendo @{channel}: {e}`\n"
+            f"👉 O bot precisa estar no canal: https://t.me/{channel}",
+            del_in=10,
+        )
+        return
+    if not found:
+        await sent.edit(f"`Build {build} não achado em @{channel}.`")
+        return
+    try:
+        await found.forward(m.chat.id)
+        await sent.delete()
+    except Exception as e:
+        await sent.edit(f"`Achei mas falhou enviar: {e}`")
+
+
+@app.on_message(cmd("miui", prefixes=PREFIXES))
 async def miui_(c, m):
     args = m.text.split()
     if len(args) < 2:
@@ -334,7 +404,7 @@ async def miui_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(filters.command("ngapps"))
+@app.on_message(cmd("ngapps", prefixes=PREFIXES))
 async def ngapps_(c, m):
     args = m.text.split()
     ver = next((a for a in args[1:] if a.isdigit()), "")
