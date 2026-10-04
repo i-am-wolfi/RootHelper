@@ -16,6 +16,8 @@ LOG = logging.getLogger("roothelper")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 OWNER_ID = int(os.environ.get("OWNER_ID", "0") or 0)
+# Aviso de boot (temporário, até o projeto final): manda ao OWNER ao ligar
+STARTUP_NOTICE = os.environ.get("STARTUP_NOTICE", "🛠️ RootHelper online — build em andamento, comandos chegando.")
 DATA = Path(os.environ.get("DATA_DIR", "data"))
 DATA.mkdir(exist_ok=True)
 
@@ -44,6 +46,14 @@ flood_db = {}  # chat_id -> {user_id: [timestamps]}
 
 def is_admin(chat_id, user_id):
     return user_id == OWNER_ID
+
+
+@app.on_message(filters.command("ping"))
+async def ping_(c, m):
+    t0 = time.time()
+    sent = await m.reply("🏓 Pong!")
+    ms = int((time.time() - t0) * 1000)
+    await sent.edit(f"🏓 Pong! `{ms}ms`")
 
 
 @app.on_message(filters.command("start"))
@@ -212,6 +222,11 @@ async def main():
         raise SystemExit("BOT_TOKEN não definido. Exporte BOT_TOKEN ou crie bot.env")
     await app.start()
     LOG.info("RootHelper on: @%s", (await app.get_me()).username)
+    if OWNER_ID and STARTUP_NOTICE:
+        try:
+            await app.send_message(OWNER_ID, STARTUP_NOTICE)
+        except Exception as e:
+            LOG.warning("aviso de boot falhou: %s", e)
     await asyncio.Event().wait()
 
 
