@@ -1,6 +1,6 @@
 # ROM/root fetchers (pure functions, no userbot deps) — shared logic ported from KannaX
 
-"""buscas web: ofox, los, cr, axion, ksu, lsp, apatch, zygisk, xfw, ngapps, gsm device"""
+"""buscas web: ofox, los, cr, axion, ksu, astrong, apatch, zygisk, xfw, ngapps, gsm device"""
 
 import datetime
 import os
@@ -52,18 +52,17 @@ def ksu():
     return f"🔓 **KernelSU `{tag}`**\n\n⬇️ [Manager APK]({apk})"
 
 
-def lsp():
-    tag, assets = _gh_releases("LSPosed/LSPosed")
-    lines = [f"🧩 **LSPosed `{tag}`**", ""]
-    for name, url in assets.items():
-        flavor = "riru" if "riru" in name.lower() else ("zygisk" if "zygisk" in name.lower() else "zip")
-        lines.append(f"⬇️ [{flavor}]({url})")
-    return "\n".join(lines)
-
-
 def zygisk():
     tag, assets = _gh_releases("LSPosed/ZygiskNext")
     lines = [f"⚡ **ZygiskNext `{tag}`**", ""]
+    for name, url in assets.items():
+        lines.append(f"⬇️ [{name}]({url})")
+    return "\n".join(lines)
+
+
+def astrong():
+    tag, assets = _gh_releases("evoker0/AlwaysStrong")
+    lines = [f"💪 **AlwaysStrong `{tag}`**", ""]
     for name, url in assets.items():
         lines.append(f"⬇️ [{name}]({url})")
     return "\n".join(lines)

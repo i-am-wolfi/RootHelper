@@ -86,7 +86,7 @@ async def help_(c, m):
         "/axion <cod> [gms|vanilla] — AxionOS\n"
         "/miui <cod> — firmware Xiaomi (MIUI/HyperOS)\n"
         "/ngapps [android] [variante] — NikGapps\n"
-        "/ksu /ksun /lsp /zygisk /apatch — root tools"
+        "/ksu /ksun /astrong /zygisk /apatch — root tools"
     )
 
 
@@ -95,7 +95,7 @@ async def start_(c, m):
     await m.reply(
         "🤖 **RootHelper** — helper para grupos de ROMs\n\n"
         "Comandos: /help /rules /report /note /warn /pin\n"
-        "ROMs: /ofox /los /cr /axion /ksu /lsp /apatch",
+        "ROMs: /ofox /los /cr /axion /ksu /astrong /apatch",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📕 Regras", callback_data="show_rules")]]),
     )
 
@@ -188,7 +188,7 @@ async def notes_watch(c, m):
         trig = text[1:].split()[0].lower().split("@")[0]
         if trig in ("ping", "help", "start", "rules", "setrules", "report",
                     "note", "addnote", "delnote", "warn", "unwarn", "pin",
-                    "ofox", "los", "cr", "axion", "ksu", "lsp", "zygisk",
+                    "ofox", "los", "cr", "axion", "ksu", "astrong", "zygisk",
                     "apatch", "miui", "ngapps"):
             return  # é comando, não nota
     if text.startswith("!") and len(text) > 1:
@@ -322,7 +322,7 @@ async def axion_(c, m):
         await sent.edit(f"`Falha: {e}`")
 
 
-@app.on_message(cmd(["ksu", "lsp", "zygisk", "apatch"], prefixes=PREFIXES))
+@app.on_message(cmd(["ksu", "astrong", "zygisk", "apatch"], prefixes=PREFIXES))
 async def root_tools_(c, m):
     cmdname = m.text.split()[0].lstrip("/#!").split("@")[0]
     sent = await m.reply(f"`Buscando {cmdname}...`")
